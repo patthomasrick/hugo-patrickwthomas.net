@@ -1,0 +1,274 @@
+<!DOCTYPE html>
+<html lang="en-us">
+    <head>
+        
+        <meta charset="utf-8">
+<meta http-equiv="X-UA-Compatible" content="chrome=1">
+<meta name="HandheldFriendly" content="True">
+<meta name="MobileOptimized" content="320">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="referrer" content="no-referrer">
+
+<title>
+Using Py Py With Shared Hosting - Patrick Thomas
+</title>
+
+
+
+        <meta property="og:title" content="Using PyPy with Shared Hosting - Patrick Thomas" />
+<meta property="og:type" content="website" />
+<meta property="og:description" content=""/>
+<meta property="og:url" content="https://patrickwthomas.net/blog/200815-using-pypy-with-shared-hosting/"/>
+<meta property="og:site_name" content="Patrick Thomas"/>
+
+
+
+
+
+
+
+        
+<link rel="shortcut icon" href="/img/fav.ico">
+
+
+        
+
+
+
+
+
+<link rel="stylesheet" href="/css/main.min.fd305464b78a696bf57b43ad5621ad74b7698b6ac64e403f9a9149acdd945a7c.css" integrity="sha256-/TBUZLeKaWv1e0OtViGtdLdpi2rGTkA/mpFJrN2UWnw=" crossorigin="anonymous" media="screen">
+
+
+
+
+
+        
+        
+        
+        
+    </head>
+    <body>
+        <section id="top" class="section">
+            
+            <div class="container hero ">
+                
+
+<h1 class="bold-title is-1">Blog</h1>
+
+
+            </div>
+            
+            <div class="section ">
+                
+<div class="container">
+    <hr>
+    <nav class="navbar" role="navigation" aria-label="main navigation">
+        
+        <a role="button" class="navbar-burger" data-target="navMenu" aria-label="menu" aria-expanded="false" >
+          <span aria-hidden="true"></span>
+          <span aria-hidden="true"></span>
+          <span aria-hidden="true"></span>
+        </a>
+        <div class="navbar-menu " id="navMenu">
+            
+            
+            
+            
+            <a class="navbar-item" href="/">main</a>
+            
+
+            
+            
+
+            
+                
+            
+
+            
+
+            
+            
+            
+            
+            
+                
+                
+                
+                
+                  <a class="navbar-item" href="https://patrickwthomas.net/blog/">
+                  
+                  Back to Blog
+                  
+                  </a>
+                
+                
+            
+            
+            
+            
+
+            
+            
+            <a class="navbar-item" href="/#contact">Contact</a>
+            
+            
+
+            
+
+            
+            
+        </div>
+    </nav>
+    <hr>
+</div>
+
+
+
+                
+<div class="container">
+    <h2 class="title is-1 top-pad strong-post-title">
+        <a href="https://patrickwthomas.net/blog/200815-using-pypy-with-shared-hosting/">Using PyPy with Shared Hosting</a>
+    </h2>
+    <div class="post-data">
+        Aug 15, 2020 |
+        4 minutes read
+    </div>
+    
+    
+</div>
+
+<div class="container markdown top-pad">
+    <p><a href="https://www.hostgator.com/">HostGator</a>, the people who host this website, offer a shared hosting plan. This plan has several distinct advantages in that getting started is very easy as well as hosting and domain name registration is relatively cheap, especially for long term plans. However, this comes at the cost of customization, especially with regards to the software the comes installed. At the time of writing, the newest version of PHP available on a shared plan is PHP 7.1.14, which came out in early 2018. This is still usable by all means, however, installing the newest frameworks and plugins can be painful. This also applies to Python, where the newest versions of Python 2 and 3 installed are versions 2.6.6 and 3.2.3 respectively. This presents challenges when you want to use the most up-to-date and shiny software, and this is compounded by the fact that you can’t directly install Python or anything needed to build Python (ruling out solutions like <a href="https://github.com/pyenv/pyenv">pyenv</a>). However, I was able to get a version of <a href="https://www.pypy.org/">PyPy</a> working on a shared server environment and serving a simple <a href="https://flask.palletsprojects.com/en/1.1.x/">Flask</a> webpage.</p>
+
+<h1 id="introduction" class="anchor-link"><a href="#introduction">Introduction</a></h1>
+<p>The approach that I used was to get PyPy working on a local machine, and then I copied all of the PyPy files (along with its necessary libraries) to the shared server. <strong>Note that this tutorial assumes you are working in Linux and have a Linux shared hosting server.</strong> You might have to get a VirtualMachine running with some recent desktop version of Linux, like Ubuntu or Manjaro.</p>
+<p>First, I downloaded PyPy from PyPy’s website: <a href="https://www.pypy.org/download.html#python-3-6-compatible-pypy3-6-v7-3-1">https://www.pypy.org/download.html#python-3-6-compatible-pypy3-6-v7-3-1</a>. At the time of writing, this happened to be PyPy3.6 v7.3.1, and you need to get a version that you will run on your server. Thus, since my shared hosting server ran x86-64 Linux, I downloaded the x86-64 version of PyPy.</p>
+<p>Next, untar the PyPy binaries into some directory:</p>
+<div class="highlight"><pre style="background-color:#f0f0f0;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-sh" data-lang="sh"><span style="color:#007020">cd</span> ~/Downloads <span style="color:#60a0b0;font-style:italic"># or wherever you downloaded the PyPy tarball</span>
+tar xvf <span style="color:#4070a0">&#34;pypy3.6-v7.3.1-linux64.tar.bz2&#34;</span>
+</code></pre></div><p>For me, this creates a new directory pypy3.6-v7.3.1-linux64. Ensure that PyPy downloaded correctly and has all of the necessary libraries by running PyPy:</p>
+<div class="highlight"><pre style="background-color:#f0f0f0;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-sh" data-lang="sh">pypy3.6-v7.3.1-linux64/bin/pypy3
+</code></pre></div><p>Which should give you an interactive Python prompt like below:</p>
+<pre><code>Python 3.6.9 (2ad108f17bdb, Apr 07 2020, 02:59:05)
+[PyPy 7.3.1 with GCC 7.3.1 20180303 (Red Hat 7.3.1-5)] on linux
+Type &quot;help&quot;, &quot;copyright&quot;, &quot;credits&quot; or &quot;license&quot; for more information.
+&gt;&gt;&gt;&gt;
+</code></pre><p>Now that we have verified that this works, we can now copy over the files. This can be done one of two ways: <code>scp</code> or <code>tar</code> then <code>scp</code>. I will do this via <code>tar</code> and <code>scp</code>. However, you can skip the <code>tar</code> portion if wanted.</p>
+<div class="highlight"><pre style="background-color:#f0f0f0;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-sh" data-lang="sh">tar cvfh pypy.tar pypy3.6-v7.3.1-linux64 <span style="color:#60a0b0;font-style:italic"># creates a tar archive named</span> 
+<span style="color:#60a0b0;font-style:italic"># pypy.tar that contains all of the pypy files, INCLUDING DEREFERENCED</span> 
+<span style="color:#60a0b0;font-style:italic"># SYMLINKED FILES</span>
+scp pypy.tar username@yourhost.com:~/ <span style="color:#60a0b0;font-style:italic"># copies pypy.tar to your</span> 
+<span style="color:#60a0b0;font-style:italic"># remote home directory</span>
+ssh username@yourhost.com
+tar xvf pypy.tar <span style="color:#60a0b0;font-style:italic"># extract pypy</span>
+</code></pre></div><p>Now PyPy should be extracted to your home directory. Next, you’ll want to add PyPy to your <code>PATH</code>. For bash, which is what HostGator uses, I will add the following paths to my <code>PATH</code>:</p>
+<div class="highlight"><pre style="background-color:#f0f0f0;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-sh" data-lang="sh"><span style="color:#007020">export</span> <span style="color:#bb60d5">PATH</span><span style="color:#666">=</span><span style="color:#4070a0">&#34;</span><span style="color:#bb60d5">$PATH</span><span style="color:#4070a0">:</span><span style="color:#bb60d5">$HOME</span><span style="color:#4070a0">/.pypy/bin:</span><span style="color:#bb60d5">$HOME</span><span style="color:#4070a0">/.local/bin&#34;</span>
+</code></pre></div><p>This will add both PyPy as well as any install pip packages to your PATH.
+Now, after closing your SSH session and SSHing back in, you can test PyPy and install Flask:</p>
+<div class="highlight"><pre style="background-color:#f0f0f0;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-sh" data-lang="sh">pypy3 --versionpypy3 -m pip install flask --user <span style="color:#60a0b0;font-style:italic"># forces usage of pypy&#39;s pip</span>
+</code></pre></div>
+<h1 id="configuring-flask" class="anchor-link"><a href="#configuring-flask">Configuring Flask</a></h1>
+<p>Now since Flask is installed, we can configure a simple web service that employs Flask. First, get a simple Flask app from their own <a href="https://flask.palletsprojects.com/en/1.1.x/quickstart/#a-minimal-application">getting started tutorial</a>:</p>
+<div class="highlight"><pre style="background-color:#f0f0f0;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-py" data-lang="py"><span style="color:#007020;font-weight:bold">from</span> <span style="color:#0e84b5;font-weight:bold">flask</span> <span style="color:#007020;font-weight:bold">import</span> Flask
+app <span style="color:#666">=</span> Flask(__name__)
+<span style="color:#555;font-weight:bold">@app.route</span>(<span style="color:#4070a0">&#39;/&#39;</span>)
+<span style="color:#007020;font-weight:bold">def</span> <span style="color:#06287e">hello_world</span>():
+    <span style="color:#007020;font-weight:bold">return</span> <span style="color:#4070a0">&#39;Hello, World!&#39;</span>
+</code></pre></div><p>I named this file <code>app.py</code> and placed in my (now empty) <code>public_html</code>, or whatever is the front-facing public folder that is served at your address. Now we need to configure a CGI file, and I did this following another Flask tutorial. I created a file named <code>app.cgi</code> and placed the following inside:</p>
+<div class="highlight"><pre style="background-color:#f0f0f0;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-py" data-lang="py"><span style="color:#60a0b0;font-style:italic">#!/path/to/.pypy/bin/pypy3</span>
+<span style="color:#007020;font-weight:bold">from</span> <span style="color:#0e84b5;font-weight:bold">wsgiref.handlers</span> <span style="color:#007020;font-weight:bold">import</span> CGIHandler
+<span style="color:#007020;font-weight:bold">from</span> <span style="color:#0e84b5;font-weight:bold">app</span> <span style="color:#007020;font-weight:bold">import</span> app
+CGIHandler()<span style="color:#666">.</span>run(app)
+</code></pre></div><p>Lastly, create a <code>.htaccess</code> file with the following contents that is also from the tutorial:</p>
+<pre><code>RewriteEngine On
+RewriteCond %{REQUEST_FILENAME} !-f # Don't interfere with static files
+RewriteRule ^(.*)$ /path/to/public_html/app.cgi/$1 [L]
+</code></pre>
+<h1 id="ending-remarks" class="anchor-link"><a href="#ending-remarks">Ending Remarks</a></h1>
+<p>You’ll want to add a lot more to your <code>.htaccess</code> if you want to use this seriously; the current <code>.htaccess</code> file allows for direct access to your code, which you may not want.</p>
+<p>I think it would be possible to also use Django in this way, and I definitely know it is possible to install Django through PyPy’s <code>pip</code>, start a project with <code>django-admin startproject myapp</code>, and then run that Django project in a development setting. However, how that would work with CGI is left as an exercise to the reader (HostGator does not support WSGI, so you would have to patch support for FastCGI back into Django).</p>
+
+</div>
+
+
+    <div class="disqus">
+        <div id="disqus_thread"></div>
+<script type="application/javascript">
+    var disqus_config = function () {
+    
+    
+    
+    };
+    (function() {
+        if (["localhost", "127.0.0.1"].indexOf(window.location.hostname) != -1) {
+            document.getElementById('disqus_thread').innerHTML = 'Disqus comments not available by default when the website is previewed locally.';
+            return;
+        }
+        var d = document, s = d.createElement('script'); s.async = true;
+        s.src = '//' + "patrickwthomas" + '.disqus.com/embed.js';
+        s.setAttribute('data-timestamp', +new Date());
+        (d.head || d.body).appendChild(s);
+    })();
+</script>
+<noscript>Please enable JavaScript to view the <a href="https://disqus.com/?ref_noscript">comments powered by Disqus.</a></noscript>
+<a href="https://disqus.com" class="dsq-brlink">comments powered by <span class="logo-disqus">Disqus</span></a>
+    </div>
+
+
+
+                
+                <div class="container">
+    <hr>
+</div>
+<div class="container has-text-centered top-pad">
+    <a href="#top">
+        <i class="fa fa-arrow-up"></i>
+    </a>
+</div>
+
+<div class="container">
+    <hr>
+</div>
+
+                <div class="section" id="footer">
+    <div class="container has-text-centered">
+    
+        <span class="footer-text">
+            <a href="https://github.com/victoriadrake/hugo-theme-introduction/"><strong>Introduction</strong></a> theme for <a href="http://gohugo.io/">Hugo</a>. Made with <a href="https://victoria.dev"><i class="fa fa-heart"></i> and <i class="fa fa-coffee"></i></a> by open source contributors.
+        </span>
+    
+    </div>
+</div>
+
+                
+            </div>
+        </section>
+        
+        
+
+
+<script src="https://patrickwthomas.net/js/bundle.93c0c6d75acb9f1eb92ca3981b53b0d2bf30b4e42c9afd8646d082a29658b138.js" integrity="sha256-k8DG11rLnx65LKOYG1Ow0r8wtOQsmv2GRtCCopZYsTg="></script>
+
+
+<script type="application/javascript">
+var doNotTrack = false;
+if (!doNotTrack) {
+	window.ga=window.ga||function(){(ga.q=ga.q||[]).push(arguments)};ga.l=+new Date;
+	ga('create', 'UA-170261281-2', 'auto');
+	
+	ga('send', 'pageview');
+}
+</script>
+<script async src='https://www.google-analytics.com/analytics.js'></script>
+
+
+
+
+
+        
+        
+        
+        
+    </body>
+</html>
