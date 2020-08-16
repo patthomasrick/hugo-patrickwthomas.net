@@ -1,0 +1,6 @@
+
+# VSCode
+.vscode/
+
+# Hugo output directory
+public/
