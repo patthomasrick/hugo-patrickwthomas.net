@@ -5,3 +5,6 @@
 # Hugo output directory
 public/
 resources/
+
+# Node
+node_modules/

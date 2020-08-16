@@ -1,0 +1,25 @@
+{
+  "name": "hugo-patrickwthomas.net",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/patthomasrick/hugo-patrickwthomas.net.git"
+  },
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/patthomasrick/hugo-patrickwthomas.net/issues"
+  },
+  "homepage": "https://github.com/patthomasrick/hugo-patrickwthomas.net#readme",
+  "dependencies": {
+    "autoprefixer": "^9.8.6",
+    "hugo": "0.0.3",
+    "postcss-cli": "^7.1.1",
+    "prettier": "^2.0.5"
+  }
+}
