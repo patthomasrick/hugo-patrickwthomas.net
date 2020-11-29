@@ -1,12 +1,12 @@
 ---
 title: "Fourier Series Approximation in Go" # Title of your project
 date: 2020-08-16T10:47:41-04:00
-weight: 10 # Order in which to show this project on the home page
+weight: 3 # Order in which to show this project on the home page
 external_link: "" # Optional external link instead of modal
 resources:
     - src: images/plot_square.jpg
       params:
-          weight: -100 # Optional weighting for a specific image in this project folder
+          weight: 0 # Optional weighting for a specific image in this project folder
 draft: false
 ---
 
