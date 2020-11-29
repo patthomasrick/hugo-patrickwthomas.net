@@ -16,7 +16,7 @@ resources:
     - src: cs4750-friends.png
       params:
           weight: 1
-draft: true
+draft: false
 ---
 
 Hoo's Watching is a website based around movies and is similar to the functions that IMDb's website provides. Users of the website can make an account, like and comment on movies, add a movie to their favorites or watch list, add friends and see what their friends are following, and also like and rate principles and actors of titles.
